@@ -248,9 +248,10 @@ def main():
         full_name, existing = select_repository(user["login"], args.name)
         verb = "接回" if existing else "创建"
         url = f"https://github.com/{full_name}"
-        print(f"{verb}私有档案：{url}", flush=True)
         if args.plan:
+            print(f"只读预览：将{verb}私有档案 {url}")
             return 0
+        print(f"正在{verb}私有档案：{url}", flush=True)
         if existing is None:
             generate_repository(full_name)
         info = ready_repository(full_name)

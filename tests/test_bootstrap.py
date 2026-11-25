@@ -91,6 +91,7 @@ class BootstrapTest(unittest.TestCase):
 
     def run_setup(self, workspace, *args):
         real_which = shutil.which
+        output = io.StringIO()
         def executable(name):
             return "mock-gh" if name == "gh" else real_which(name)
         rewrite = f"url.{self.bare.as_uri()}.insteadOf=https://github.com/{self.target}.git"
@@ -99,13 +100,14 @@ class BootstrapTest(unittest.TestCase):
             mock.patch.object(bootstrap, "GIT_AUTH", ["git", "-c", "protocol.file.allow=always", "-c", rewrite]),
             mock.patch.object(shutil, "which", side_effect=executable),
             mock.patch.object(sys, "argv", ["bootstrap.py", "--workspace", str(workspace), "--skip-search", *args]),
-            contextlib.redirect_stdout(io.StringIO()),
+            contextlib.redirect_stdout(output),
         ):
             self.assertEqual(bootstrap.main(), 0)
+        return output.getvalue()
 
     def test_create_write_resume_and_read_on_second_device(self):
         first = self.scratch / "device-one"
-        self.run_setup(first, "--plan")
+        self.assertIn("只读预览", self.run_setup(first, "--plan"))
         self.assertFalse(self.bare.exists())
         self.assertFalse(first.exists())
         occupied = first / "ai-personal-profile-2"
