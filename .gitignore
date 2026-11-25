@@ -1,0 +1,11 @@
+/ops/*.local.md
+/exports/
+/.tools/
+__pycache__/
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+id_rsa*
+id_ed25519*

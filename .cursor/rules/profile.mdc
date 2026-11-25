@@ -1,0 +1,6 @@
+---
+alwaysApply: true
+description: 本仓库的个人档案入口
+---
+
+打开本仓库时，读取并遵循根目录的 `AGENTS.md`。其中列出各类任务对应的档案位置。
