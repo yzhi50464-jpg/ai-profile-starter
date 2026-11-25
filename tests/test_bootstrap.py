@@ -143,3 +143,8 @@ class BootstrapTest(unittest.TestCase):
         with mock.patch.object(subprocess, "run", return_value=denied):
             with self.assertRaises(bootstrap.GitHubError):
                 bootstrap.select_repository("reader", "test")
+
+    def test_a_different_template_origin_is_never_reused(self):
+        elsewhere = {"template_repository": {"full_name": "reader/some-other-template"}}
+        with mock.patch.object(bootstrap, "has_marker", side_effect=AssertionError("unneeded lookup")):
+            self.assertFalse(bootstrap.is_template_copy(self.primary, elsewhere))

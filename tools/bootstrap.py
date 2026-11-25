@@ -57,6 +57,13 @@ def has_marker(full_name, branch):
                 base64.b64decode(record.get("content", "")).strip() == MARKER.encode())
 
 
+def is_template_copy(full_name, info):
+    parent_name = (info.get("template_repository") or {}).get("full_name")
+    if parent_name:
+        return parent_name.casefold() == TEMPLATE.casefold()
+    return has_marker(full_name, info["default_branch"])
+
+
 def numbered_names(base):
     yield base
     for number in itertools.count(2):
@@ -69,13 +76,10 @@ def select_repository(login, base):
         info = api(f"repos/{full_name}", missing_ok=True)
         if info is None:
             return full_name, None
-        if info.get("visibility") == "private" and info.get("private") is True:
+        if (info.get("visibility") == "private" and info.get("private") is True
+                and is_template_copy(full_name, info)):
             require_private(info, full_name)
-            parent = info.get("template_repository") or {}
-            if parent.get("full_name", "").casefold() == TEMPLATE.casefold() or has_marker(
-                full_name, info["default_branch"]
-            ):
-                return full_name, info
+            return full_name, info
 
 
 def generate_repository(full_name):
@@ -89,10 +93,7 @@ def generate_repository(full_name):
         if existing is None:
             raise
         require_private(existing, full_name)
-        parent = existing.get("template_repository") or {}
-        if parent.get("full_name", "").casefold() != TEMPLATE.casefold() and not has_marker(
-            full_name, existing["default_branch"]
-        ):
+        if not is_template_copy(full_name, existing):
             raise ValueError("创建期间仓库名已被占用。请重新运行以重新选择名称。")
 
 
