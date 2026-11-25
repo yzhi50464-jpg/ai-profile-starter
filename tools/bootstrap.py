@@ -13,6 +13,11 @@ import time
 from pathlib import Path
 from urllib.parse import quote
 
+if __package__:
+    from . import profile_hook
+else:
+    import profile_hook
+
 
 TEMPLATE = "yzhi50464-jpg/ai-profile-starter"
 MARKER = TEMPLATE + "/v1"
@@ -228,6 +233,9 @@ def main():
     parser.add_argument("--plan", action="store_true", help="只读检查并显示拟使用的仓库")
     parser.add_argument("--remote-only", action="store_true", help="只在 GitHub 建立或接回私有档案")
     parser.add_argument("--skip-search", action="store_true", help="本次仅接入 Git 和网页导出")
+    parser.add_argument("--client", action="append", choices=profile_hook.CLIENTS, help="为指定客户端安装对话回调，可重复")
+    parser.add_argument("--project-dir", type=Path, help="额外接入当前使用的业务项目目录")
+    parser.add_argument("--skip-automation", action="store_true", help="仅搭建档案和资料工具")
     args = parser.parse_args()
     if not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9._-]{0,79}", args.name):
         parser.error("仓库名请使用字母、数字、点、下划线或短横线")
@@ -261,6 +269,14 @@ def main():
             path, can_prepare = checkout(workspace, info)
             print(f"私有副本：{path}", flush=True)
             if can_prepare:
+                if not args.skip_automation:
+                    clients = args.client or [c for c in profile_hook.CLIENTS if shutil.which(c)]
+                    if clients:
+                        profile_hook.install(path, info, path, clients)
+                        if args.project_dir and args.project_dir.resolve() != path:
+                            profile_hook.install(path, info, args.project_dir, clients)
+                    else:
+                        print("未识别本机客户端。可用 --client 指定 codex、claude 或 gemini。")
                 prepare_local(path, user, not args.skip_search)
                 print("网页档案已校验。" if args.skip_search else "网页档案已校验，本机全文索引已建立。")
         print(f"交给下一位助手：请读取我的私有档案 {url} 中的 AGENTS.md，开始时按任务读档，结束时更新并同步本次进展。")

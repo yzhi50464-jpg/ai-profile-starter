@@ -12,7 +12,7 @@ https://github.com/yzhi50464-jpg/ai-profile-starter
 
 准备一个 GitHub 账号，使用能操作本机文件和终端、或具备 GitHub 建库能力的 Agent。需要登录时，由你在 GitHub 官方页面完成授权。只有网页操作能力时，也可以在[从模板创建仓库](https://github.com/yzhi50464-jpg/ai-profile-starter/generate)页面选择自己的账号和 **Private**。
 
-完成后，Agent 会给你**属于你的私有仓库地址**。你可以先告诉它一条真实偏好，例如「给我讲新概念时，先举个例子」。以后开始工作时它先读档，结束时把值得交接的进展写回私有副本。
+完成后，Agent 会给你**属于你的私有仓库地址**。在接入的 Codex、Claude Code 或 Gemini CLI 工作区里，说一句「我习惯先看例子」就可以继续聊。每轮结束时程序会把识别出的偏好、决定和进度写回私库。下次在已接入的工作区开聊，助手会自动读到这些条目。首次启用需要按客户端提示信任回调。[自动整理如何工作](docs/automation.md)
 
 ## 我的副本里有什么
 

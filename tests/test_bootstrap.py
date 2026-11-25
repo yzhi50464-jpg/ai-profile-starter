@@ -63,7 +63,7 @@ class BootstrapTest(unittest.TestCase):
         target = "repos/" + self.target
         if self.bare.exists():
             if endpoint == target:
-                return {"full_name": self.target, "private": True, "visibility": "private",
+                return {"id": 101, "full_name": self.target, "private": True, "visibility": "private",
                         "default_branch": "main", "template_repository": {"full_name": bootstrap.TEMPLATE}}
             if endpoint == target + "/contents/README.md?ref=main":
                 sha = git("--git-dir", self.bare, "rev-parse", "main:README.md")
@@ -99,7 +99,7 @@ class BootstrapTest(unittest.TestCase):
             mock.patch.object(bootstrap, "api", side_effect=self.api),
             mock.patch.object(bootstrap, "GIT_AUTH", ["git", "-c", "protocol.file.allow=always", "-c", rewrite]),
             mock.patch.object(shutil, "which", side_effect=executable),
-            mock.patch.object(sys, "argv", ["bootstrap.py", "--workspace", str(workspace), "--skip-search", *args]),
+            mock.patch.object(sys, "argv", ["bootstrap.py", "--workspace", str(workspace), "--skip-search", "--client", "codex", *args]),
             contextlib.redirect_stdout(output),
         ):
             self.assertEqual(bootstrap.main(), 0)
@@ -115,6 +115,8 @@ class BootstrapTest(unittest.TestCase):
         (occupied / "existing.txt").write_text("keep", encoding="utf-8")
         self.run_setup(first)
         local = first / "ai-personal-profile-2-2"
+        self.assertTrue((local / ".codex/hooks.json").is_file())
+        self.assertEqual(git("status", "--porcelain", cwd=local), "")
         self.assertEqual((occupied / "existing.txt").read_text(), "keep")
         self.assertIn("https://github.com/" + self.target, (local / "README.md").read_text(encoding="utf-8"))
         self.assertEqual(git("remote", "get-url", "origin", cwd=local), "https://github.com/" + self.target + ".git")
